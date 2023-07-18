@@ -85,4 +85,6 @@ class Response:
 
 class Response404(Response):
     def __init__(self) -> None:
-        super().__init__(ResponseCode.NOT_FOUND, ContentType.TEXT_HTML, b"")
+        super().__init__(
+            ResponseCode.NOT_FOUND, ContentType.TEXT_HTML, "Not found".encode()
+        )

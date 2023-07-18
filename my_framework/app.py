@@ -1,8 +1,10 @@
 from typing import Dict, List
 
-from my_framework.middlewares import FrontController
-from my_framework.views import PageController, PageNotFound404
 from my_framework.exceptions import MFalreadyRegisteredError
+from my_framework.http_utils import Request, Response404
+from my_framework.middlewares import FrontController
+from my_framework.statics import StaticsController
+from my_framework.views import PageController
 
 
 class MyFrameworkApp:
@@ -12,10 +14,14 @@ class MyFrameworkApp:
     _fronts: List[FrontController]
     """ path, page controller"""
 
-    def __init__(self, name: str):
+    def __init__(
+        self, name: str, statics_route_prefix="/statics/", statics_path="static"
+    ):
         self._name = name
         self._routes = {}
         self._fronts = []
+        self._statics_route_prefix = statics_route_prefix
+        self.statics = StaticsController(statics_path)
 
     def register_front(self, fc: FrontController) -> None:
         if fc in self._fronts:
@@ -31,28 +37,39 @@ class MyFrameworkApp:
 
     def __call__(self, environ: dict, start_response) -> List[bytes]:
         # получаем адрес, по которому выполнен переход
-        path = environ["PATH_INFO"]
+        path = str(environ["PATH_INFO"])
 
-        # добавление закрывающего слеша
-        if not path.endswith("/"):
-            path = path + "/"
+        if path.startswith(self._statics_route_prefix):
+            statics_path = path.replace(self._statics_route_prefix, "")
+            response = self.statics.get(statics_path)
 
-        # находим нужный контроллер
-        # отработка паттерна page controller
-        view = self._routes.get(path, PageNotFound404())
+        else:
+            # добавление закрывающего слеша
+            if not path.endswith("/"):
+                path = path + "/"
 
-        request = {}
-        # наполняем словарь request элементами
-        # этот словарь получат все контроллеры
-        # отработка паттерна front controller
-        for front in self._fronts:
-            front(request)
+            # находим нужный контроллер
+            # отработка паттерна page controller
+            view = self._routes.get(path, None)
+            if view:
+                # обрабатываем параметры запроса
+                req = Request(environ)
+                request = {"method": req.method, "data": req.data}
+                print(f"request {request}")
 
-        # запуск контроллера с передачей объекта request
-        code, body = view(request)
+                # наполняем словарь request элементами
+                # этот словарь получат все контроллеры
+                # отработка паттерна front controller
+                for front in self._fronts:
+                    front(request)
 
-        start_response(code, [("Content-Type", "text/html")])
-        return [body.encode("utf-8")]
+                # запуск контроллера с передачей объекта request
+                response = view(request)
+            else:
+                response = Response404()
+
+        start_response(response.code, [response.header])
+        return [response.content]
 
     def run(self, host="", port=8080):
         from wsgiref.simple_server import make_server

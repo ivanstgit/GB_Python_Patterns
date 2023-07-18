@@ -9,7 +9,8 @@ from my_simple_app.views import MyIndexPage, MyContactPage
 
 class MyApp(MyFrameworkApp):
     def __init__(self, root_path: str):
-        super().__init__("MyApp")
+        static_path = os.path.join(root_path, "static")
+        super().__init__("MyApp", statics_path=static_path)
 
         self.register_front(MyFCDater())
 

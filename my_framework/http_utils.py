@@ -23,10 +23,18 @@ class ResponseCode:
 
 
 class Request:
+    @staticmethod
+    def get_path(env: dict):
+        return str(env["PATH_INFO"])
+
+    custom_data: dict
+
     def __init__(self, env: dict) -> None:
         self._env = env
+        self._path = self.get_path(env)
         self._method = env.get("REQUEST_METHOD", None)
         self._data = {}
+        self.custom_data = {}
         if self._method == HTTPMethod.GET:
             self._data = self._get_data_from_query_string()
         elif self._method == HTTPMethod.POST:
@@ -39,6 +47,13 @@ class Request:
     @property
     def data(self) -> dict:
         return self._data
+
+    @property
+    def path(self) -> str:
+        return self._path
+
+    def __str__(self) -> str:
+        return f"Request <path {self.path}>, <method {self.method}>, <data {self.data}>, <cust {self.custom_data}>"
 
     def _get_data_from_query_string(self) -> dict:
         query_string = self._env.get("QUERY_STRING", None)

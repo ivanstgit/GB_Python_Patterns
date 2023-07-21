@@ -1,20 +1,17 @@
-from typing_extensions import override
-
+from my_framework.http_utils import ResponseCode
 from my_framework.templates import Template
-from my_framework.views import PageController as PC, ResponseCodes as RC
+from my_framework.views import PageController
 
 from my_simple_app.middleware import MyFCDater
 
 
-class MyIndexPage(PC):
-    @override
+class MyIndexPage(PageController):
     def request(self, request):
         content = Template("index.html").render(date=request.get(MyFCDater.date))
-        return RC.OK, content
+        return ResponseCode.OK, content
 
 
-class MyContactPage(PC):
-    @override
+class MyContactPage(PageController):
     def request(self, request):
         content = Template("contacts.html").render(date=request.get(MyFCDater.date))
-        return RC.OK, content
+        return ResponseCode.OK, content

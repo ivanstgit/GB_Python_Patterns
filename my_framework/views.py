@@ -1,25 +1,16 @@
 from typing import Tuple
-from typing_extensions import override
 
 from my_framework.exceptions import MFNotImplementedError
+from my_framework.http_utils import ContentType, Response, ResponseCode
 
 
 class PageController:
     """Реализация паттерна PageController"""
 
-    def __call__(self, request: dict) -> Tuple[str, str]:
-        return self.request(request)
+    def __call__(self, request: dict) -> Response:
+        code, body = self.request(request)
+        return Response(code, ContentType.TEXT_HTML, body.encode())
 
     def request(self, request) -> Tuple[str, str]:
+        """return code, content"""
         raise MFNotImplementedError
-
-
-class PageNotFound404(PageController):
-    @override
-    def request(self, request):
-        return ResponseCodes.NOT_FOUND, "404 PAGE Not Found"
-
-
-class ResponseCodes:
-    OK = "200 OK"
-    NOT_FOUND = "404 WHAT"

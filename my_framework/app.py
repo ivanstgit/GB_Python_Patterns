@@ -37,7 +37,7 @@ class MyFrameworkApp:
 
     def __call__(self, environ: dict, start_response) -> List[bytes]:
         # получаем адрес, по которому выполнен переход
-        path = str(environ["PATH_INFO"])
+        path = Request.get_path(environ)
 
         if path.startswith(self._statics_route_prefix):
             statics_path = path.replace(self._statics_route_prefix, "")
@@ -53,8 +53,7 @@ class MyFrameworkApp:
             view = self._routes.get(path, None)
             if view:
                 # обрабатываем параметры запроса
-                req = Request(environ)
-                request = {"method": req.method, "data": req.data}
+                request = Request(environ)
                 print(f"request {request}")
 
                 # наполняем словарь request элементами

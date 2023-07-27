@@ -1,8 +1,14 @@
 <ul id="menu">
     <!-- put class="selected" in the li tag for the selected page - to highlight which page you're on -->
-    <li {% if path=="/" %} class="selected" {% endif %}><a href="/">Home</a></li>
+    <li {% if path=="/" %} class="selected" {% endif %}><a href="/">Главная</a></li>
+    <li {% if path=="/categories/" %} class="selected" {% endif %}>
+        <a href="/categories/">Категории</a>
+    </li>
+    <li {% if path=="/courses/" %} class="selected" {% endif %}>
+        <a href="/courses/">Курсы</a>
+    </li>
     {# <li><a href="examples.html">Examples</a></li>
     <li><a href="page.html">A Page</a></li>
     <li><a href="another_page.html">Another Page</a></li> #}
-    <li {% if path=="/contacts/" %} class="selected" {% endif %}><a href="/contacts/">Contact Us</a></li>
+    <li {% if path=="/contacts/" %} class="selected" {% endif %}><a href="/contacts/">Контакты</a></li>
 </ul>

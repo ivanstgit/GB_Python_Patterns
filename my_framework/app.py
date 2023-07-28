@@ -1,10 +1,10 @@
 from typing import Dict, List
 
 from my_framework.exceptions import MFalreadyRegisteredError
-from my_framework.http_utils import Request, Response404
-from my_framework.middlewares import FrontController
-from my_framework.statics import StaticsController
-from my_framework.views import PageController
+from my_framework.http_controller import Request, Response404
+from my_framework.middleware_controller import FrontController
+from my_framework.static_controller import StaticsController
+from my_framework.view_controller import PageController
 
 
 class MyFrameworkApp:
@@ -15,7 +15,7 @@ class MyFrameworkApp:
     """ path, page controller"""
 
     def __init__(
-        self, name: str, statics_route_prefix="/statics/", statics_path="static"
+        self, name: str, statics_route_prefix="/statics/", statics_path="statics"
     ):
         self._name = name
         self._routes = {}
@@ -54,7 +54,6 @@ class MyFrameworkApp:
             if view:
                 # обрабатываем параметры запроса
                 request = Request(environ)
-                print(f"request {request}")
 
                 # наполняем словарь request элементами
                 # этот словарь получат все контроллеры

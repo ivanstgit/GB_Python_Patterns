@@ -2,7 +2,7 @@ from abc import abstractmethod
 from typing import Tuple
 
 from my_framework.exceptions import MFNotImplementedError
-from my_framework.http_utils import ContentType, Request, Response, ResponseCode
+from my_framework.http_controller import ContentType, Request, Response, ResponseCode
 
 
 class PageController:

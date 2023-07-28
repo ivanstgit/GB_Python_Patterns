@@ -1,7 +1,7 @@
 from abc import abstractmethod
 
 from my_framework.exceptions import MFNotImplementedError
-from my_framework.http_utils import Request
+from my_framework.http_controller import Request
 
 
 class FrontController:

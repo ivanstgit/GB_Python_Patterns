@@ -1,6 +1,6 @@
 import os.path
 
-from my_framework.http_utils import ContentType, Response, ResponseCode
+from my_framework.http_controller import ContentType, Response, ResponseCode
 
 
 class StaticsController:

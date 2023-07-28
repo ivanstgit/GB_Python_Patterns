@@ -4,7 +4,7 @@ from my_simple_app.core.exceptions import MyAppAlreadyExistsError
 from my_simple_app.core.models import Course, CourseCategory
 
 
-class CourseCategoryController:
+class CategoryView:
     storage: Dict[int, CourseCategory]
     ext_key_index: Dict[str, int]
 
@@ -36,7 +36,7 @@ class CourseCategoryController:
         return list(self.storage.values())
 
 
-class CourseController:
+class CourseView:
     storage: Dict[int, Course]
     ext_key_index: Dict[str, int]
 
@@ -74,3 +74,21 @@ class CourseController:
             if res:
                 return list(res)
         return list(self.storage.values())
+
+
+class ProxyView:
+    def __init__(self) -> None:
+        self._category_view = None
+        self._course_view = None
+
+    @property
+    def categories(self) -> CategoryView:
+        if not self._category_view:
+            self._category_view = CategoryView()
+        return self._category_view
+
+    @property
+    def courses(self) -> CourseView:
+        if not self._course_view:
+            self._course_view = CourseView()
+        return self._course_view

@@ -1,5 +1,7 @@
 from copy import deepcopy
 
+from my_framework.view_controller import PageController
+
 
 class SingletonByName(type):
     # порождающий паттерн Синглтон
@@ -39,3 +41,19 @@ class PrototypeMixin:
         if isinstance(obj, UniqueIdObject):
             obj.id = 0
         return obj
+
+
+class AppRouter:
+    routes = {}
+
+    def __init__(self, url: str):
+        """
+        Сохраняем значение переданного параметра
+        """
+        self.url = url
+
+    def __call__(self, cls):
+        """
+        Сам декоратор
+        """
+        self.routes[self.url] = cls

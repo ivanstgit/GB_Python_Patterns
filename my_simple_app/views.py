@@ -1,10 +1,11 @@
 from my_framework.http_controller import HTTPMethod, Request, ResponseCode
 from my_framework.template_engine import MFTemplate
 from my_framework.view_controller import PageController
-from my_simple_app.core.controllers import CourseCategoryController, CourseController
+from my_simple_app.core.common import AppRouter
+
+from my_simple_app.core.views import ProxyView
 from my_simple_app.core.exceptions import MyAppException
 from my_simple_app.core.models import (
-    Course,
     CourseCategory,
     CourseFactory,
     OfflineCourse,
@@ -14,6 +15,13 @@ from my_simple_app.core.models import (
 from my_simple_app.middlewares import MyFCDater
 
 
+class PageViewController(PageController):
+    def __init__(self, core_view: ProxyView) -> None:
+        super().__init__()
+        self.core_view = core_view
+
+
+@AppRouter("/")
 class MyIndexPage(PageController):
     def request(self, request):
         content = MFTemplate("index.html").render(
@@ -23,6 +31,7 @@ class MyIndexPage(PageController):
         return ResponseCode.OK, content
 
 
+@AppRouter("/contacts/")
 class MyContactPage(PageController):
     def request(self, request):
         content = MFTemplate("contacts.html").render(
@@ -32,13 +41,10 @@ class MyContactPage(PageController):
         return ResponseCode.OK, content
 
 
-class MyCategoryListPage(PageController):
-    def __init__(self, controller: CourseCategoryController) -> None:
-        super().__init__()
-        self.controller = controller
-
+@AppRouter("/categories/")
+class MyCategoryListPage(PageViewController):
     def request(self, request: Request):
-        category_list = self.controller.get_list()
+        category_list = self.core_view.categories.get_list()
 
         content = MFTemplate("categories_list.html").render(
             path=request.path,
@@ -47,11 +53,8 @@ class MyCategoryListPage(PageController):
         return ResponseCode.OK, content
 
 
-class MyCategoryAddPage(PageController):
-    def __init__(self, controller: CourseCategoryController) -> None:
-        super().__init__()
-        self.controller = controller
-
+@AppRouter("/categories/add/")
+class MyCategoryAddPage(PageViewController):
     def request(self, request: Request):
         f_cat_name = ""
         f_errors = []
@@ -60,7 +63,7 @@ class MyCategoryAddPage(PageController):
             if f_cat_name:
                 try:
                     cat = CourseCategory(f_cat_name)
-                    self.controller.add(cat)
+                    self.core_view.categories.add(cat)
                     f_cat_name = ""
                 except MyAppException as exc:
                     f_errors = [str(exc)]
@@ -73,27 +76,19 @@ class MyCategoryAddPage(PageController):
         return ResponseCode.OK, content
 
 
-class MyCourseListPage(PageController):
-    def __init__(
-        self,
-        cat_controller: CourseCategoryController,
-        course_controller: CourseController,
-    ) -> None:
-        super().__init__()
-        self.course_controller = course_controller
-        self.cat_controller = cat_controller
-
+@AppRouter("/courses/")
+class MyCourseListPage(PageViewController):
     def request(self, request: Request):
         # filters:
         category = None
         category_id = request.data.get("category_id", "")
         if category_id:
             try:
-                category = self.cat_controller.get_by_id(int(category_id))
+                category = self.core_view.categories.get_by_id(int(category_id))
             except Exception as exc:
                 category = None
 
-        course_list = self.course_controller.get_list(category)
+        course_list = self.core_view.courses.get_list(category)
 
         content = MFTemplate("courses_list.html").render(
             path=request.path,
@@ -103,22 +98,14 @@ class MyCourseListPage(PageController):
         return ResponseCode.OK, content
 
 
-class MyCourseAddPage(PageController):
-    def __init__(
-        self,
-        cat_controller: CourseCategoryController,
-        course_controller: CourseController,
-    ) -> None:
-        super().__init__()
-        self.course_controller = course_controller
-        self.cat_controller = cat_controller
-
+@AppRouter("/courses/add/")
+class MyCourseAddPage(PageViewController):
     def request(self, request: Request):
         # form fields:
         f_course_name = ""
         f_category_id = ""
         f_type_id = ""
-        f_category_list = self.cat_controller.get_list()
+        f_category_list = self.core_view.categories.get_list()
         f_type_list = CourseFactory.get_types()
         f_errors = []
 
@@ -129,13 +116,13 @@ class MyCourseAddPage(PageController):
 
             if f_course_name and f_category_id and f_type_id:
                 try:
-                    cat = self.cat_controller.get_by_id(int(f_category_id))
+                    cat = self.core_view.categories.get_by_id(int(f_category_id))
                     if not cat:
                         raise MyAppException
                     course = CourseFactory.create(
                         type_=f_type_id, name=f_course_name, category=cat
                     )
-                    self.course_controller.add(course)
+                    self.core_view.courses.add(course)
 
                     redirect_url = f"/courses/edit/?course_id={course.id}"
 
@@ -158,21 +145,13 @@ class MyCourseAddPage(PageController):
         return ResponseCode.OK, content
 
 
-class MyCourseEditPage(PageController):
-    def __init__(
-        self,
-        cat_controller: CourseCategoryController,
-        course_controller: CourseController,
-    ) -> None:
-        super().__init__()
-        self.course_controller = course_controller
-        self.cat_controller = cat_controller
-
+@AppRouter("/courses/edit/")
+class MyCourseEditPage(PageViewController):
     def request(self, request: Request):
         # form fields:
         course_id = request.data.get("id")
         if course_id:
-            course = self.course_controller.get_by_id(int(course_id))
+            course = self.core_view.courses.get_by_id(int(course_id))
         else:
             course = None
         f_errors = []

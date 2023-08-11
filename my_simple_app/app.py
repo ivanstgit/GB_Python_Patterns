@@ -4,7 +4,13 @@ from my_framework.app import MyFrameworkApp
 from my_framework.template_engine import MFTemplate
 
 from my_simple_app.core.common import AppRouter
-from my_simple_app.core.models import CourseCategory, OfflineCourse, OnlineCourse
+from my_simple_app.core.models import (
+    CourseCategory,
+    CourseUser,
+    OfflineCourse,
+    OnlineCourse,
+    Student,
+)
 from my_simple_app.core.views import ProxyView
 
 from my_simple_app.middlewares import MyFCDater, MyLogger
@@ -38,4 +44,10 @@ class MyApp(MyFrameworkApp):
         c2 = OnlineCourse("Мой офис", cc2)
         core_view.courses.add(c1)
         core_view.courses.add(c2)
+        st1 = Student("Вася")
+        st2 = Student("Петя")
+        core_view.students.add(st1)
+        core_view.students.add(st2)
+        core_view.course_students.add(CourseUser(c1, st1))
+        core_view.course_students.add(CourseUser(c2, st2))
         # } test

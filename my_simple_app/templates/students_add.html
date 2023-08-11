@@ -1,0 +1,26 @@
+{% extends "_base.html" %}
+
+{% block title %}
+Добавление студента
+{% endblock %}
+
+{% block content %}
+<!-- insert the page content here -->
+<h1>Добавить студента:</h1>
+<form action="#" method="post">
+  <div class="form_settings">
+    {% if f_errors: %}
+    <p><span>Имя студента</span><input class="error" type="text" name="f_student_name" value="{{f_student_name}}"
+        required />
+    </p>
+    {% else %}
+    <p><span>Имя студента</span><input class="" type="text" name="f_student_name" value="" required /></p>
+    {% endif %}
+    {% for _error in f_errors: %}
+    <p><span class="error_text">{{_error}}</span></p>
+    {% endfor %}
+    <p style="padding-top: 15px"><span>&nbsp;</span><input class="submit" type="submit" name="student_submitted"
+        value="Добавить" /></p>
+  </div>
+</form>
+{% endblock %}

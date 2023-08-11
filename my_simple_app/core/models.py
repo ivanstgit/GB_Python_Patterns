@@ -1,5 +1,6 @@
 from typing import Dict, List, Optional
-from my_simple_app.core.common import PrototypeMixin, UniqueIdObject
+
+from my_simple_app.core.common import Observer, PrototypeMixin, UniqueIdObject
 
 
 class CourseType:
@@ -14,12 +15,22 @@ class CourseCategory(UniqueIdObject):
         self.name = name
 
 
+# абстрактный пользователь
+class User(UniqueIdObject):
+    def __init__(self, name: str) -> None:
+        super().__init__()
+        self.name = name
+
+
 class Course(UniqueIdObject, PrototypeMixin):
+    students: List[User]
+
     def __init__(self, name: str, category: CourseCategory, type_: CourseType):
         super().__init__()
         self.name = name
         self.category = category
         self.course_type = type_
+        self.students = []
 
 
 # онлайн курсы (вебинары), для них указывается вебинарная система
@@ -71,11 +82,6 @@ class CourseFactory:
         return list(res)
 
 
-# абстрактный пользователь
-class User(UniqueIdObject):
-    pass
-
-
 # преподаватель
 class Teacher(User):
     pass
@@ -83,7 +89,11 @@ class Teacher(User):
 
 # студент
 class Student(User):
-    pass
+    courses: List[Course]
+
+    def __init__(self, name: str) -> None:
+        super().__init__(name)
+        self.courses = []
 
 
 class UserFactory:
@@ -94,5 +104,12 @@ class UserFactory:
 
     # порождающий паттерн Фабричный метод
     @classmethod
-    def create(cls, type_):
-        return cls.types[type_]()
+    def create(cls, type_: str, name: str):
+        return cls.types[type_](name)
+
+
+class CourseUser(UniqueIdObject):
+    def __init__(self, course: Course, user: User) -> None:
+        self.course = course
+        self.user = user
+        self.ext_key = f"{course.id}_{user.id}"

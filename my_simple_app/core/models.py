@@ -1,6 +1,7 @@
 from typing import Dict, List, Optional
 
 from my_simple_app.core.common import Observer, PrototypeMixin, UniqueIdObject
+from my_simple_app.core.db import DomainObject
 
 
 class CourseType:
@@ -88,7 +89,7 @@ class Teacher(User):
 
 
 # студент
-class Student(User):
+class Student(User, DomainObject):
     courses: List[Course]
 
     def __init__(self, name: str) -> None:

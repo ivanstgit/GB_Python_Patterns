@@ -4,6 +4,8 @@ from my_framework.app import MyFrameworkApp
 from my_framework.template_engine import MFTemplate
 
 from my_simple_app.core.common import AppRouter
+from my_simple_app.core.db import UnitOfWork
+from my_simple_app.core.db_mappers import MapperRegistry
 from my_simple_app.core.models import (
     CourseCategory,
     CourseUser,
@@ -21,6 +23,9 @@ class MyApp(MyFrameworkApp):
     def __init__(self, root_path: str):
         static_path = os.path.join(root_path, "statics")
         super().__init__("MyApp", statics_path=static_path)
+
+        UnitOfWork.new_current()
+        UnitOfWork.get_current().set_mapper_registry(MapperRegistry)
 
         core_view = ProxyView()
 

@@ -1,10 +1,11 @@
-from my_simple_app.core.common import SingletonByName
+from my_simple_app.core.common import FileWriter, SingletonByName
 
 
 class Logger(metaclass=SingletonByName):
-    def __init__(self, name):
+    def __init__(self, name, writer=FileWriter("log.txt")):
         self.name = name
+        self.writer = writer
 
-    @staticmethod
-    def log(text):
-        print("log--->", text)
+    def log(self, text):
+        text = f"log---> {text}"
+        self.writer.write(text)

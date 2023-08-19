@@ -1,15 +1,17 @@
 from my_framework.http_controller import HTTPMethod, Request, ResponseCode
 from my_framework.template_engine import MFTemplate
 from my_framework.view_controller import PageController
-from my_simple_app.core.common import AppRouter
 
+from my_simple_app.core.common import AppRouter
 from my_simple_app.core.views import ProxyView
 from my_simple_app.core.exceptions import MyAppException
 from my_simple_app.core.models import (
     CourseCategory,
     CourseFactory,
+    CourseUser,
     OfflineCourse,
     OnlineCourse,
+    Student,
 )
 
 from my_simple_app.middlewares import MyFCDater
@@ -169,6 +171,8 @@ class MyCourseEditPage(PageViewController):
                         if f_address:
                             course.address = f_address
 
+                    self.core_view.courses.notify_users(course)
+
                     content = MFTemplate("_redirect.html").render(url="/courses/")
                     return ResponseCode.OK, content
 
@@ -193,4 +197,83 @@ class MyCourseEditPage(PageViewController):
             f_errors = ["Не заполнены обязательные поля формы"]
             content = MFTemplate("_redirect.html").render(url="/courses/")
 
+        return ResponseCode.OK, content
+
+
+@AppRouter("/students/")
+class MyStudentListPage(PageViewController):
+    def request(self, request: Request):
+        student_list = self.core_view.students.get_list()
+
+        content = MFTemplate("students_list.html").render(
+            path=request.path,
+            student_list=student_list,
+        )
+        return ResponseCode.OK, content
+
+
+@AppRouter("/students/add/")
+class MyStudentAddPage(PageViewController):
+    def request(self, request: Request):
+        f_student_name = ""
+        f_errors = []
+        if request.method == HTTPMethod.POST:
+            f_student_name = request.data.get("f_student_name")
+            if f_student_name:
+                try:
+                    student = Student(f_student_name)
+                    self.core_view.students.add(student)
+                    f_student_name = ""
+                except MyAppException as exc:
+                    f_errors = [str(exc)]
+
+        content = MFTemplate("students_add.html").render(
+            path=request.path,
+            f_student_name=f_student_name,
+            f_errors=f_errors,
+        )
+        return ResponseCode.OK, content
+
+
+@AppRouter("/students/add_course/")
+class MyStudentAddCoursePage(PageViewController):
+    def request(self, request: Request):
+        f_course_list = self.core_view.courses.get_list(None)
+        f_student_list = self.core_view.students.get_list()
+        f_errors = []
+
+        if request.method == HTTPMethod.POST:
+            f_course_id = request.data.get("f_course_id")
+            f_student_id = request.data.get("f_student_id")
+            if f_student_id and f_course_id:
+                try:
+                    course = self.core_view.courses.get_by_id(int(f_course_id))
+                    student = self.core_view.students.get_by_id(int(f_student_id))
+                    cu = CourseUser(course, student)  # type: ignore
+                    self.core_view.course_students.add(cu)
+                    f_course_id = ""
+                except MyAppException as exc:
+                    f_errors = [str(exc)]
+        else:
+            course_id = request.data.get("course_id")
+            student_id = request.data.get("student_id")
+            # if course_id:
+            #     course = self.core_view.courses.get_by_id(int(course_id))
+            # else:
+            #     course = None
+            # if student_id:
+            #     student = self.core_view.students.get_by_id(int(student_id))
+            # else:
+            #     student = None
+            f_course_id = course_id
+            f_student_id = student_id
+
+        content = MFTemplate("students_add_course.html").render(
+            path=request.path,
+            f_course_id=f_course_id,
+            f_course_list=f_course_list,
+            f_student_id=f_student_id,
+            f_student_list=f_student_list,
+            f_errors=f_errors,
+        )
         return ResponseCode.OK, content

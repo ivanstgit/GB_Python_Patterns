@@ -1,0 +1,29 @@
+{% extends "_base.html" %}
+
+{% block title %}
+Студенты
+{% endblock %}
+
+{% block content %}
+<!-- insert the page content here -->
+<h1>Список студентов</h1>
+<table style="width:100%; border-spacing:0;">
+  <tr>
+    <th>Имя</th>
+    <th>Курсы</th>
+  </tr>
+  {% for student in student_list: %}
+  <tr>
+    <td>{{student.name}}</td>
+    <td>
+      {% for course in student.courses: %}
+      {{course.name}}&nbsp;
+      {% endfor %}
+      <a href="/students/add_course/?student_id={{student.id}}">Добавить</a>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+<br>
+<li><a href="/students/add/">Добавить студента</a></li>
+{% endblock %}

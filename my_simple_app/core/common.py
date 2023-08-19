@@ -1,4 +1,6 @@
+from abc import ABC, abstractmethod
 from copy import deepcopy
+from typing import List
 
 from my_framework.view_controller import PageController
 
@@ -57,3 +59,39 @@ class AppRouter:
         Сам декоратор
         """
         self.routes[self.url] = cls
+
+
+# поведенческий паттерн - Стратегия
+class ConsoleWriter:
+    def write(self, text):
+        print(text)
+
+
+class FileWriter:
+    def __init__(self, filename: str):
+        self.file_name = filename
+
+    def write(self, text):
+        with open(self.file_name, "a", encoding="utf-8") as f:
+            f.write(f"{text}\n")
+
+
+# поведенческий паттерн - наблюдатель
+class Observer(ABC):
+    @abstractmethod
+    def data_changed(self, notifier):
+        pass
+
+
+class Notifier:
+    _observers: List[Observer]
+
+    def __init__(self):
+        self._observers = []
+
+    def add_observer(self, observer: Observer):
+        self._observers.append(observer)
+
+    def notify(self):
+        for item in self._observers:
+            item.data_changed(self)

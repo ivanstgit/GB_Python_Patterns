@@ -1,5 +1,7 @@
 from typing import Dict, List, Optional
 from my_simple_app.core.common import Notifier, Observer, UniqueIdObject
+from my_simple_app.core.db import DomainObject, UnitOfWork
+from my_simple_app.core.db_mappers import MapperRegistry
 
 from my_simple_app.core.exceptions import MyAppAlreadyExistsError
 from my_simple_app.core.models import Course, CourseCategory, CourseUser, Student, User
@@ -125,23 +127,38 @@ class CourseView(ObjectStorage, Observer):
                 notifier.notify(student, f"курс изменен {course.name}")
 
 
-class StudentView(ObjectStorage, Observer):
-    storage: Dict[int, Student]
+class StudentView(Observer):
+    def __init__(self) -> None:
+        super().__init__()
+        self.mapper_name = "student"
 
     def add(self, obj: Student) -> Student:
-        return super().add(obj, obj.name)  # type: ignore
+        conn = UnitOfWork.get_current().connection
+        mapper = MapperRegistry.get_current_mapper(self.mapper_name, conn)
+
+        obj.mark_new()
+        UnitOfWork.get_current().commit()
+        ext_key = obj.name
+        new_obj = mapper.get_by_name(ext_key)
+        return new_obj  # type: ignore
 
     def get_by_id(self, id) -> Optional[Student]:
-        return super().get_by_id(id)  # type: ignore
+        conn = UnitOfWork.get_current().connection
+        mapper = MapperRegistry.get_current_mapper(self.mapper_name, conn)
+        return mapper.get_by_id(id)  # type: ignore
 
     def get_by_name(self, name: str) -> Optional[Student]:
-        return super().get_by_ext_key(name)  # type: ignore
+        conn = UnitOfWork.get_current().connection
+        mapper = MapperRegistry.get_current_mapper(self.mapper_name, conn)
+        return mapper.get_by_name(name)  # type: ignore
 
-    def get_list(self) -> Optional[List[Student]]:
-        return super().get_list()  # type: ignore
+    def get_list(self) -> List[Student]:
+        conn = UnitOfWork.get_current().connection
+        mapper = MapperRegistry.get_current_mapper(self.mapper_name, conn)
+        return mapper.all()  # type: ignore
 
     def data_changed(self, notifier: CourseUserView):
-        for student in self.storage.values():
+        for student in self.get_list():
             _courses = notifier.get_list_by_student(student)
             if _courses:
                 student.courses = _courses

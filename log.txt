@@ -61,3 +61,12 @@ log---> Request <path /students/add_course/>, <method POST>, <data {'f_student_i
 log---> Request <path /students/add_course/>, <method POST>, <data {'f_student_id': '1', 'f_course_id': '2', 'student_submitted': 'Добавить'}>, <cust {'date': datetime.date(2023, 8, 11)}>
 log---> Request <path /students/>, <method GET>, <data {}>, <cust {'date': datetime.date(2023, 8, 11)}>
 log---> Request <path /students/add_course/>, <method GET>, <data {'student_id': '3'}>, <cust {'date': datetime.date(2023, 8, 11)}>
+log---> Request <path />, <method GET>, <data {}>, <cust {'date': datetime.date(2023, 8, 19)}>
+log---> Request <path /students/>, <method GET>, <data {}>, <cust {'date': datetime.date(2023, 8, 19)}>
+log---> Request <path /students/add/>, <method GET>, <data {}>, <cust {'date': datetime.date(2023, 8, 19)}>
+log---> Request <path /students/add/>, <method POST>, <data {'f_student_name': 'Артем', 'student_submitted': 'Добавить'}>, <cust {'date': datetime.date(2023, 8, 19)}>
+log---> Request <path /students/>, <method GET>, <data {}>, <cust {'date': datetime.date(2023, 8, 19)}>
+log---> Request <path /students/>, <method GET>, <data {}>, <cust {'date': datetime.date(2023, 8, 19)}>
+log---> Request <path /students/>, <method GET>, <data {}>, <cust {'date': datetime.date(2023, 8, 19)}>
+log---> Request <path /courses/>, <method GET>, <data {}>, <cust {'date': datetime.date(2023, 8, 19)}>
+log---> Request <path /students/>, <method GET>, <data {}>, <cust {'date': datetime.date(2023, 8, 19)}>
